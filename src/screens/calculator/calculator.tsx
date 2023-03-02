@@ -6,8 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+import { Parser } from "expr-eval";
 import fonts from "../../constants/fonts";
 import layouts from "../../constants/layouts";
 import { makeUseStyles } from "../../helpers/makeUseStyles";
@@ -47,10 +49,49 @@ export const Calculator: React.FC<RootTabScreenProps<"Calculator">> = ({}) => {
     [palette]
   );
 
-  const handleChange = (label: string) => {
+  const handleClear = () => {
+    setText(``);
+    setResult(0);
+  };
+
+  const handleNumberOperation = (label: string) => {
+    let innerText = text;
+
+    const splits = innerText.split(" ");
+    const lastNums = splits[splits.length - 1] || "";
+
+    if (lastNums.length === 12) {
+      return;
+    }
+
+    if (lastNums.includes(".") && label === ".") {
+      return;
+    }
+
+    // handle decimals as first letters
+    if (!lastNums && label === ".") {
+      innerText = `${innerText}0`;
+    }
+
+    if (innerText.includes("=")) {
+      setText(`${label}`);
+      setResult(0);
+    } else {
+      setText(`${innerText}${label}`);
+    }
+  };
+
+  const handleSymbolOperation = (label: string) => {
     const symbols = ["-", "x", "+", "%", "÷"];
 
-    if (symbols.includes(label)) {
+    if (!symbols.includes(label)) {
+      return false;
+    }
+
+    if (text.includes("=")) {
+      setResult(0);
+      setText(`${result} ${label} `);
+    } else {
       const lastChar = text.charAt(text.length - 2);
       const isSymbol = symbols.includes(lastChar);
       if (isSymbol) {
@@ -58,18 +99,25 @@ export const Calculator: React.FC<RootTabScreenProps<"Calculator">> = ({}) => {
       } else {
         setText(`${text || 0} ${label} `);
       }
+    }
 
+    return true;
+  };
+
+  const handleChange = (label: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (handleSymbolOperation(label)) {
       return;
     }
 
     const caseFun = {
-      C: () => setText(``),
+      C: handleClear,
       "+/-": () => setText(`- ${text || 0}`),
-      undefined: setText(`${text}${label}`),
     };
 
     const key = label as keyof typeof caseFun;
-    caseFun[key]?.();
+    caseFun[key] ? caseFun[key]() : handleNumberOperation(label);
   };
 
   const handleSum = () => {
@@ -77,11 +125,11 @@ export const Calculator: React.FC<RootTabScreenProps<"Calculator">> = ({}) => {
       return;
     }
 
-    // setResult(eval(text));
-    console.log("====================================");
-    console.log(eval(text));
-    console.log("====================================");
-    setText(`${text} =`);
+    const sum = text.replaceAll("x", "*").replaceAll("÷", "/");
+
+    setResult(Parser.evaluate(sum));
+    setText(`${text} = `);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   return (
