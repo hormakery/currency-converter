@@ -19,9 +19,9 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   navigation,
 }) => {
   const { styles, palette } = useStyles();
-  const [clicked, setClicked] = useState(Boolean);
-  const [searchInput, setSearchInput] = useState("");
+  const [clicked, setClicked] = useState(false);
   const { currency, setCurrency } = useContext();
+  const [searchInput, setSearchInput] = useState("");
   const { error, isLoading, currencies } = useCurrency();
 
   const handleSelect = (data: typeof currency) => {
@@ -79,7 +79,7 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
             onPress={() => handleSelect(currency)}
           >
             <View style={styles.innerCardSyle}>
-              <Text style={styles.currency}>{currency.name}</Text>
+              <Text style={styles.currency}>{currency.flag}</Text>
               <View style={{ marginLeft: 15 }}>
                 <Text style={styles.title}>{currency.symbol}</Text>
                 <Text style={styles.label}>{currency.country}</Text>
@@ -151,7 +151,7 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   currency: {
     color: palette.grey,
     alignItems: "center",
-    fontSize: fonts.size.xlg,
+    fontSize: fonts.size.xxlg*2,
     fontWeight: fonts.weight.bold,
   },
   title: {

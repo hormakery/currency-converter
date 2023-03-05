@@ -7,11 +7,7 @@ export interface BasicError {
 export interface CurrencyInterface {
   id: number;
   name: string;
-  symbol: string;
   flag: string;
+  symbol: string;
   country: string;
-}
-
-export interface CurrencyResponseInterface extends CurrencyInterface {
-  currency: CurrencyInterface[];
 }
