@@ -17,7 +17,7 @@ export default {
     grey: "#2F2F32",
     postBackground: "#f2f2f2",
     calculatorButton1: "#C8C7CD",
-    favorite: "	#bf9b30",
+    checked: "	#bf9b30",
   },
   dark: {
     text: "#fff",
@@ -37,6 +37,6 @@ export default {
     grey: "#414142",
     postBackground: "#1b1c1e",
     calculatorButton1: "1A1E22",
-    favorite: "	#bf9b30",
+    checked: "	#bf9b30",
   },
 };

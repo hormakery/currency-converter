@@ -14,6 +14,7 @@ import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootStackScreenProps } from "../../types/navigation";
 import { useContext } from "../../providers/ContextProvider";
 import { useCurrency } from "../../hooks/useCurrency";
+import { Checkbox } from "../../component/checkbox";
 
 export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   navigation,
@@ -81,17 +82,12 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
             <View style={styles.innerCardSyle}>
               <Text style={styles.currency}>{currency.flag}</Text>
               <View style={{ marginLeft: 15 }}>
-                <Text style={styles.title}>{currency.symbol}</Text>
+                <Text style={styles.title}>{currency.name}</Text>
                 <Text style={styles.label}>{currency.country}</Text>
               </View>
             </View>
 
-            <FontAwesome
-              name="star"
-              size={20}
-              style={styles.checkIcon}
-              color={clicked ? palette.favorite : palette.grey}
-            />
+            <Checkbox isChecked={currency.country === currency.country} />
           </TouchableOpacity>
         ))}
       </View>
@@ -141,7 +137,6 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: layout.gutter,
-    paddingVertical: layout.gutter * 2,
   },
   innerCardSyle: {
     flexDirection: "row",
@@ -151,7 +146,7 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   currency: {
     color: palette.grey,
     alignItems: "center",
-    fontSize: fonts.size.xxlg*2,
+    fontSize: fonts.size.xxlg * 2,
     fontWeight: fonts.weight.bold,
   },
   title: {
