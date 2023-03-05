@@ -6,12 +6,12 @@ import {
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { HomeScreen } from "../screens/home";
-import { StackList } from "../types/navigation";
+import { RootScreen } from "./root";
+import { RootStackList } from "../types/navigation";
 import { usePrepareApp } from "../hooks/usePrepareApp";
 import { useIsDarkMode } from "../hooks/useIsDarkMode";
 
-const Stack = createNativeStackNavigator<StackList>();
+const Stack = createNativeStackNavigator<RootStackList>();
 
 export const Navigation = () => {
   const isDarkMode = useIsDarkMode();
@@ -27,7 +27,7 @@ export const Navigation = () => {
       theme={isDarkMode ? DarkTheme : DefaultTheme}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Root" component={RootScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

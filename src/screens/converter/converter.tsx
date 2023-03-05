@@ -1,22 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  ScrollView,
   TextInput,
+  ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import {
-  MaterialCommunityIcons,
-  FontAwesome,
   Ionicons,
+  FontAwesome,
+  MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import { CommonActions } from "@react-navigation/native";
 
-import layouts from "../../constants/layouts";
-import { getCurrentDate } from "../../helpers/getCurrentDate";
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootTabScreenProps } from "../../types/navigation";
-import fonts from "../../constants/fonts";
+import { getCurrentDate } from "../../helpers/getCurrentDate";
+import { useCurrency } from "../../providers/ContextProvider";
 
 const CLICK_BUTTONS = [
   { label: "1", margin: 0 },
@@ -32,34 +32,55 @@ const CLICK_BUTTONS = [
   { label: "0", margin: 2 },
 ];
 
-export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({}) => {
-  const { styles, palette } = useStyles();
-  const [currency, setCurrency] = useState({
+export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
+  navigation,
+}) => {
+  const { currency } = useCurrency();
+  const { styles, palette, fonts } = useStyles();
+  const [state, setState] = useState({
     to: { amount: "98.01", label: "Euro", symbol: "€" },
     from: { amount: "100", label: "US Dollar", symbol: "$" },
   });
+  const currencyRef = useRef<keyof typeof state>("to");
 
-  const [toUnit, decimalUnit] = currency.to.amount.split(".");
+  useEffect(() => {
+    if (currency && currencyRef.current) {
+      const key = currencyRef.current;
+      setState({ ...state, [key]: { ...state[key], ...currency } });
+    }
+  }, [currency, currencyRef]);
+
+  const handlePress = (title: keyof typeof state) => {
+    currencyRef.current = title;
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: "Root",
+        params: { screen: "Currencies", params: { title } },
+      })
+    );
+  };
+
+  const [toUnit, decimalUnit] = state.to.amount.split(".");
 
   const handleSwitch = () => {
-    setCurrency({ ...currency, from: currency.to, to: currency.from });
+    setState({ ...state, from: state.to, to: state.from });
   };
 
   const handleChange = (amount: string) => {
-    if (currency.from.amount.includes(".") && amount === ".") {
+    if (state.from.amount.includes(".") && amount === ".") {
       return;
     }
 
-    setCurrency({
-      ...currency,
-      from: { ...currency.from, amount: `${currency.from.amount}${amount}` },
+    setState({
+      ...state,
+      from: { ...state.from, amount: `${state.from.amount}${amount}` },
     });
   };
 
   const handleClear = () => {
-    setCurrency({
-      ...currency,
-      from: { ...currency.from, amount: currency.from.amount.slice(0, -1) },
+    setState({
+      ...state,
+      from: { ...state.from, amount: state.from.amount.slice(0, -1) },
     });
   };
 
@@ -83,20 +104,23 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({}) => {
 
       <View>
         <View style={styles.priceWrapper}>
-          <View style={styles.currencyWrapper}>
-            <Text style={styles.currency}>{currency.from.label} </Text>
+          <TouchableOpacity
+            style={styles.currencyWrapper}
+            onPress={() => handlePress("from")}
+          >
+            <Text style={styles.currency}>{state.from.label} </Text>
             <MaterialCommunityIcons
               size={20}
+              name="chevron-down"
               style={styles.calender}
               color={palette.primary}
-              name="chevron-down"
             />
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.currencyWrapper}>
-            <Text style={styles.currency}>{currency.from.symbol}</Text>
+            <Text style={styles.currency}>{state.from.symbol}</Text>
             <TextInput
-              value={currency.from.amount}
+              value={state.from.amount}
               showSoftInputOnFocus={false}
               style={[styles.price, styles.input]}
             />
@@ -104,18 +128,21 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({}) => {
         </View>
 
         <View style={styles.priceWrapper}>
-          <View style={styles.currencyWrapper}>
-            <Text style={styles.currency}>{currency.to.label}</Text>
+          <TouchableOpacity
+            style={styles.currencyWrapper}
+            onPress={() => handlePress("to")}
+          >
+            <Text style={styles.currency}>{state.to.label}</Text>
             <MaterialCommunityIcons
               size={20}
               name="chevron-down"
               style={styles.calender}
               color={palette.primary}
             />
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.currencyWrapper}>
-            <Text style={styles.currency}>{currency.to.symbol}</Text>
+            <Text style={styles.currency}>{state.to.symbol}</Text>
             <Text style={styles.price}>
               {toUnit}
               {decimalUnit && (
@@ -171,8 +198,8 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({}) => {
 
 const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   container: {
-    paddingVertical: layouts.gutter * 2,
-    paddingHorizontal: layouts.gutter * 2,
+    paddingVertical: layout.gutter * 2,
+    paddingHorizontal: layout.gutter * 2,
   },
   headerTitle: {
     flexDirection: "row",
@@ -198,15 +225,15 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   },
   priceWrapper: {
     marginBottom: 3,
-    borderRadius: layouts.gutter / 2,
-    paddingVertical: layouts.gutter,
-    paddingHorizontal: layouts.gutter,
+    borderRadius: layout.gutter / 2,
+    paddingVertical: layout.gutter,
+    paddingHorizontal: layout.gutter,
     backgroundColor: palette.homeBackground,
   },
   currencyWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: layouts.gutter,
+    marginBottom: layout.gutter,
   },
   currency: {
     opacity: 0.6,
@@ -242,7 +269,7 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   buttonContainer: {
     flexWrap: "wrap",
     flexDirection: "row",
-    marginTop: layouts.gutter * 3,
+    marginTop: layout.gutter * 3,
   },
   button: {
     borderRadius: 3,
@@ -250,8 +277,15 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: palette.homeBackground,
-    width: (layout.screen.width - layouts.gutter * 2) / 3.3,
-    height: (layout.screen.width - layouts.gutter * 2) / 4.5,
+    width: (layout.screen.width - layout.gutter * 2) / 3.3,
+    height: (layout.screen.width - layout.gutter * 2) / 4.5,
   },
   input: {},
+  dropdown: {
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderColor: palette.text,
+  },
 }));

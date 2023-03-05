@@ -10,6 +10,11 @@ export type TabScreenList = {
 
 export type StackList = {
   Home: undefined;
+  Currencies: { title: string };
+};
+
+export type RootStackList = {
+  Root: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof StackList> =
