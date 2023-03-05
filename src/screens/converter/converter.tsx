@@ -16,7 +16,7 @@ import { CommonActions } from "@react-navigation/native";
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootTabScreenProps } from "../../types/navigation";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
-import { useCurrency } from "../../providers/ContextProvider";
+import { useContext } from "../../providers/ContextProvider";
 
 const CLICK_BUTTONS = [
   { label: "1", margin: 0 },
@@ -35,7 +35,7 @@ const CLICK_BUTTONS = [
 export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
   navigation,
 }) => {
-  const { currency } = useCurrency();
+  const { currency } = useContext();
   const { styles, palette, fonts } = useStyles();
   const [state, setState] = useState({
     to: { amount: "98.01", label: "Euro", symbol: "€" },

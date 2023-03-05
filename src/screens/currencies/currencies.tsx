@@ -12,26 +12,17 @@ import { FontAwesome } from "@expo/vector-icons";
 
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootStackScreenProps } from "../../types/navigation";
-import { useCurrency } from "../../providers/ContextProvider";
+import { useContext } from "../../providers/ContextProvider";
+import { useCurrency } from "../../hooks/useCurrency";
 
 export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   navigation,
 }) => {
-  const { styles, palette, layout } = useStyles();
+  const { styles, palette } = useStyles();
   const [clicked, setClicked] = useState(Boolean);
   const [searchInput, setSearchInput] = useState("");
-  const { currency, setCurrency } = useCurrency();
-
-  const Currencies = [
-    { key: "BTC", value: "₿", label: "Bitcoin" },
-    { key: "ETH", value: "Ξ", label: "Ethereum" },
-    { key: "GBP", value: "£", label: "British Pound" },
-    { key: "CNY", value: "¥", label: "Canadian Dollar" },
-    { key: "AFN", value: "؋", label: "Afghan Afghani" },
-    { key: "EURO", value: "€", label: "Euro" },
-    { key: "US Dollar", value: "$", label: "Unites State Dollar" },
-    { key: "NGN", value: "₦", label: "Nigeria" },
-  ];
+  const { currency, setCurrency } = useContext();
+  const { error, isLoading, currencies } = useCurrency();
 
   const handleSelect = (data: typeof currency) => {
     setCurrency(data);
@@ -80,7 +71,7 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
       </View>
 
       <View style={styles.currencyContainer}>
-        {Currencies.map((currency, index) => (
+        {currencies.map((currency, index) => (
           <TouchableOpacity
             style={styles.card}
             key={index}
@@ -88,10 +79,10 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
             onPress={() => handleSelect(currency)}
           >
             <View style={styles.innerCardSyle}>
-              <Text style={styles.currency}>{currency.key}</Text>
+              <Text style={styles.currency}>{currency.name}</Text>
               <View style={{ marginLeft: 15 }}>
-                <Text style={styles.title}>{currency.value}</Text>
-                <Text style={styles.label}>{currency.label}</Text>
+                <Text style={styles.title}>{currency.symbol}</Text>
+                <Text style={styles.label}>{currency.country}</Text>
               </View>
             </View>
 
@@ -111,7 +102,6 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
 const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   container: {
     paddingVertical: layout.gutter * 2,
-    // paddingHorizontal: layout.gutter * 2,
   },
   searchContainer: {
     flexDirection: "row",

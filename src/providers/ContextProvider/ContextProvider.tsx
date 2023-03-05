@@ -1,20 +1,18 @@
-import React, { PropsWithChildren, useState, useContext } from "react";
+import React, {
+  useState,
+  PropsWithChildren,
+  useContext as _useContext,
+} from "react";
+import { CurrencyInterface } from "../../types/types";
 
-type CurrencyType = {
-  label: string;
-  key: string;
-  value: string;
-};
 // Declaring the state object globally.
 const CurrencyContext = React.createContext<{
-  currency: CurrencyType | null;
-  setCurrency: React.Dispatch<React.SetStateAction<CurrencyType | null>>;
+  currency: CurrencyInterface | null;
+  setCurrency: React.Dispatch<React.SetStateAction<CurrencyInterface | null>>;
 }>({ currency: null, setCurrency: () => {} });
 
-type ContextState = typeof CurrencyContext;
-
 export const ContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [currency, setCurrency] = useState<CurrencyType | null>(null);
+  const [currency, setCurrency] = useState<CurrencyInterface | null>(null);
 
   // App component that provides initial context values
   return (
@@ -24,7 +22,7 @@ export const ContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-export const useCurrency = () => {
-  const { currency, setCurrency } = useContext(CurrencyContext);
+export const useContext = () => {
+  const { currency, setCurrency } = _useContext(CurrencyContext);
   return { currency, setCurrency };
 };

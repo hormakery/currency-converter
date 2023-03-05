@@ -8,12 +8,8 @@ export interface CurrencyInterface {
   id: number;
   name: string;
   symbol: string;
-  symbol_native: string;
-}
-
-export interface CountryInterface extends CurrencyInterface {
-  image: string;
-  id: number;
+  flag: string;
+  country: string;
 }
 
 export interface CurrencyResponseInterface extends CurrencyInterface {
