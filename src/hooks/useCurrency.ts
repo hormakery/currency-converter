@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCountries } from "../network/currency";
+import { getCurrencies } from "../network/currency";
 import { BasicError, CurrencyInterface } from "../types/types";
 
 export const useCurrency = () => {
@@ -10,8 +10,8 @@ export const useCurrency = () => {
   const fetchCurrencies = async () => {
     try {
       setIsLoading(true);
-      const response = await getCountries();
-      console.log(response);
+      const currencies = await getCurrencies();
+      setCurrencies(currencies)
     } catch (error: any) {
       setError(error);
     } finally {
