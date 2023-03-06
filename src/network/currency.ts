@@ -50,18 +50,25 @@ export const getCurrencies = async (): Promise<CurrencyInterface[]> => {
   );
 
   const data = await response.json();
-  const currencies: CurrencyInterface[] = data.map((currency: any) => {
-    const matched = countries.find(
-      (country: any) => country.currencies[currency.symbol]
-    );
+  const currencies: CurrencyInterface[] = data.map(
+    (currency: any, index: number) => {
+      const matched = countries.find(
+        (country: any) => country.currencies[currency.symbol]
+      );
 
-    if (!matched) return;
+      if (!matched) return;
 
-    const { currencies, ...rest } = matched;
-    return { ...currencies[currency.symbol], ...rest, name: currency.symbol };
-  });
+      const { currencies, ...rest } = matched;
+      return {
+        ...currencies[currency.symbol],
+        ...rest,
+        name: currency.symbol,
+        id: Date.now() * index,
+      };
+    }
+  );
 
-  return currencies.filter((country => country));
+  return currencies.filter((country) => country);
 };
 
 /**
