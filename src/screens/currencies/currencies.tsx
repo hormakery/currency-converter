@@ -1,20 +1,23 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import {
   View,
   Text,
+  FlatList,
   Keyboard,
   TextInput,
-  ScrollView,
+  FlatListProps,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 
 import { FontAwesome } from "@expo/vector-icons";
 
+import { Checkbox } from "../../component/checkbox";
+import { useCurrency } from "../../hooks/useCurrency";
+import { CurrencyInterface } from "../../types/types";
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootStackScreenProps } from "../../types/navigation";
 import { useContext } from "../../providers/ContextProvider";
-import { useCurrency } from "../../hooks/useCurrency";
-import { Checkbox } from "../../component/checkbox";
 
 export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   navigation,
@@ -30,47 +33,10 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
     navigation.goBack();
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.searchWrapper}>
-          <FontAwesome
-            name="search"
-            size={20}
-            color={palette.primary}
-            style={{ justifyContent: "flex-start", marginLeft: 8 }}
-          />
-          <TextInput
-            value={searchInput}
-            autoCorrect={false}
-            style={styles.search}
-            onChangeText={setSearchInput}
-            placeholder="Search Currency"
-            onFocus={() => {
-              setClicked(true);
-            }}
-          />
-        </View>
-        {clicked && (
-          <FontAwesome
-            title="Cancel"
-            onPress={() => {
-              Keyboard.dismiss();
-              setClicked(false);
-            }}
-          />
-        )}
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          backgroundColor: palette.homeBackground,
-        }}
-      >
-        <Text style={styles.currencies}>All currencies</Text>
-      </View>
-
+  const renderItem: FlatListProps<CurrencyInterface>["renderItem"] = ({
+    item,
+  }) => (
+    <Fragment>
       <View style={styles.currencyContainer}>
         {currencies.map((currency, index) => (
           <TouchableOpacity
@@ -91,13 +57,97 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
           </TouchableOpacity>
         ))}
       </View>
-    </ScrollView>
+    </Fragment>
+  );
+
+  const ListHeaderComponent: FlatListProps<CurrencyInterface>["ListHeaderComponent"] =
+    () => {
+      return (
+        <Fragment>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchWrapper}>
+              <FontAwesome
+                name="search"
+                size={20}
+                color={palette.primary}
+                style={{ justifyContent: "flex-start", marginLeft: 8 }}
+              />
+              <TextInput
+                value={searchInput}
+                autoCorrect={false}
+                style={styles.search}
+                onChangeText={setSearchInput}
+                placeholder="Search Currency"
+                onFocus={() => {
+                  setClicked(true);
+                }}
+              />
+            </View>
+            {clicked && (
+              <FontAwesome
+                title="Cancel"
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setClicked(false);
+                }}
+              />
+            )}
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              backgroundColor: palette.homeBackground,
+            }}
+          >
+            <Text style={styles.currencies}>All currencies</Text>
+          </View>
+        </Fragment>
+      );
+    };
+
+  const ListEmptyComponent: FlatListProps<CurrencyInterface>["ListEmptyComponent"] =
+    () => {
+      if (isLoading) {
+        return (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color={palette.text} />
+          </View>
+        );
+      }
+
+      if (error) {
+        return (
+          <View style={styles.loaderContainer}>
+            <Text style={styles.error}>{error.message}</Text>
+          </View>
+        );
+      }
+
+      return null;
+    };
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={currencies}
+        renderItem={renderItem}
+        ListEmptyComponent={ListEmptyComponent}
+        ListHeaderComponent={ListHeaderComponent}
+        contentContainerStyle={styles.contentContainer}
+      />
+    </View>
   );
 };
 
 const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   container: {
     paddingVertical: layout.gutter * 2,
+  },
+  contentContainer: {
+    paddingTop: layout.gutter,
+    paddingBottom: edgeInsets.bottom,
+    paddingHorizontal: layout.gutter,
   },
   searchContainer: {
     flexDirection: "row",
@@ -131,7 +181,8 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     fontFamily: fonts.variants.regular,
   },
   currencyContainer: {
-    // backgroundColor: palette.dateBackground,
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   card: {
     flexDirection: "row",
@@ -160,5 +211,17 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   },
   checkIcon: {
     borderRadius: 50,
+  },
+  loaderContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    height: layout.screen.height - layout.screen.width,
+  },
+  error: {
+    marginTop: 4,
+    color: palette.text,
+    fontSize: fonts.size.xlg,
+    fontWeight: fonts.weight.semi,
   },
 }));

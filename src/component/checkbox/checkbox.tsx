@@ -11,11 +11,11 @@ import { FontAwesome } from "@expo/vector-icons";
 
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 
-interface CheckboxProps {
-  isChecked: boolean;
-}
+// interface CheckboxProps {
+//   isChecked: boolean;
+// }
 
-export const Checkbox: React.FC<CheckboxProps> = ({}) => {
+export const Checkbox: React.FC<any> = ({}) => {
   const scale = useSharedValue(1);
   const { styles, palette } = useStyles();
   const [isChecked, setIsChecked] = useState(false);
