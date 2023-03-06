@@ -13,6 +13,7 @@ import {
 } from "@expo/vector-icons";
 import { CommonActions } from "@react-navigation/native";
 
+import { convertCurrency } from "../../network";
 import { makeUseStyles } from "../../helpers/makeUseStyles";
 import { RootTabScreenProps } from "../../types/navigation";
 import { getCurrentDate } from "../../helpers/getCurrentDate";
@@ -38,8 +39,8 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
   const { currency } = useContext();
   const { styles, palette, fonts } = useStyles();
   const [state, setState] = useState({
-    to: { amount: "98.01", name: "Euro", symbol: "€" },
-    from: { amount: "100", name: "US Dollar", symbol: "$" },
+    to: { amount: "", name: "Euro", symbol: "€" },
+    from: { amount: "", name: "US Dollar", symbol: "$" },
   });
   const currencyRef = useRef<keyof typeof state>("to");
 
@@ -66,7 +67,7 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
     setState({ ...state, from: state.to, to: state.from });
   };
 
-  const handleChange = (amount: string) => {
+  const handleChange = async (amount: string) => {
     if (state.from.amount.includes(".") && amount === ".") {
       return;
     }
@@ -74,6 +75,17 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
     setState({
       ...state,
       from: { ...state.from, amount: `${state.from.amount}${amount}` },
+    });
+
+    const response = await convertCurrency({
+      to: state.to.name,
+      from: state.from.name,
+      amount: `${state.from.amount}${amount}`,
+    });
+
+    setState({
+      ...state,
+      to: { ...state.to, amount: response.convertedAmount },
     });
   };
 
@@ -120,8 +132,8 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
           <View style={styles.currencyWrapper}>
             <Text style={styles.currency}>{state.from.symbol}</Text>
             <TextInput
-              value={state.from.amount}
               showSoftInputOnFocus={false}
+              value={state.from.amount || "0"}
               style={[styles.price, styles.input]}
             />
           </View>
@@ -144,7 +156,7 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
           <View style={styles.currencyWrapper}>
             <Text style={styles.currency}>{state.to.symbol}</Text>
             <Text style={styles.price}>
-              {toUnit}
+              {toUnit || 0}
               {decimalUnit && (
                 <Text style={[styles.price, styles.decimal]}>
                   .{decimalUnit}
