@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -36,39 +36,32 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   const renderItem: FlatListProps<CurrencyInterface>["renderItem"] = ({
     item,
   }) => (
-    <Fragment>
-      <View style={styles.currencyContainer}>
-        {currencies.map((currency, index) => (
-          <TouchableOpacity
-            style={styles.card}
-            key={index}
-            activeOpacity={0.7}
-            onPress={() => handleSelect(currency)}
-          >
-            <View style={styles.innerCardSyle}>
-              <Text style={styles.currency}>{currency.flag}</Text>
-              <View style={{ marginLeft: 15 }}>
-                <Text style={styles.title}>{currency.name}</Text>
-                <Text style={styles.label}>{currency.country}</Text>
-              </View>
-            </View>
-
-            <Checkbox isChecked={currency.country === currency.country} />
-          </TouchableOpacity>
-        ))}
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => handleSelect(item)}
+    >
+      <View style={styles.innerCardStyle}>
+        <Text style={styles.currency}>{item.flag}</Text>
+        <View style={{ marginLeft: 15 }}>
+          <Text style={styles.title}>{item.name}</Text>
+          <Text style={styles.label}>{item.country}</Text>
+        </View>
       </View>
-    </Fragment>
+
+      <Checkbox isChecked={currency?.country === item.country} />
+    </TouchableOpacity>
   );
 
   const ListHeaderComponent: FlatListProps<CurrencyInterface>["ListHeaderComponent"] =
-    () => {
-      return (
+    useCallback(
+      () => (
         <Fragment>
           <View style={styles.searchContainer}>
             <View style={styles.searchWrapper}>
               <FontAwesome
+                size={18}
                 name="search"
-                size={20}
                 color={palette.primary}
                 style={{ justifyContent: "flex-start", marginLeft: 8 }}
               />
@@ -76,35 +69,33 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
                 value={searchInput}
                 autoCorrect={false}
                 style={styles.search}
-                onChangeText={setSearchInput}
                 placeholder="Search Currency"
-                onFocus={() => {
-                  setClicked(true);
-                }}
+                onChangeText={setSearchInput}
+                onFocus={() => setClicked(true)}
               />
+
+              {clicked && (
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setClicked(false);
+                    setSearchInput("");
+                  }}
+                >
+                  <FontAwesome name="close" color={palette.hairlineColor} />
+                </TouchableOpacity>
+              )}
             </View>
-            {clicked && (
-              <FontAwesome
-                title="Cancel"
-                onPress={() => {
-                  Keyboard.dismiss();
-                  setClicked(false);
-                }}
-              />
-            )}
           </View>
 
-          <View
-            style={{
-              flexDirection: "row",
-              backgroundColor: palette.homeBackground,
-            }}
-          >
+          <View style={styles.header}>
             <Text style={styles.currencies}>All currencies</Text>
           </View>
         </Fragment>
-      );
-    };
+      ),
+      []
+    );
 
   const ListEmptyComponent: FlatListProps<CurrencyInterface>["ListEmptyComponent"] =
     () => {
@@ -128,37 +119,31 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
     };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={currencies}
-        renderItem={renderItem}
-        ListEmptyComponent={ListEmptyComponent}
-        ListHeaderComponent={ListHeaderComponent}
-        contentContainerStyle={styles.contentContainer}
-      />
-    </View>
+    <FlatList
+      data={currencies}
+      renderItem={renderItem}
+      ListEmptyComponent={ListEmptyComponent}
+      ListHeaderComponent={ListHeaderComponent}
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
 const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
   container: {
-    paddingVertical: layout.gutter * 2,
-  },
-  contentContainer: {
     paddingTop: layout.gutter,
     paddingBottom: edgeInsets.bottom,
-    paddingHorizontal: layout.gutter,
+    paddingVertical: layout.gutter * 2,
   },
   searchContainer: {
-    flexDirection: "row",
     marginBottom: 20,
+    flexDirection: "row",
     justifyContent: "flex-start",
     paddingHorizontal: layout.gutter,
   },
   searchWrapper: {
-    height: 50,
-    width: "100%",
-    borderWidth: 1,
+    flex: 1,
+    height: 40,
     borderRadius: 15,
     flexDirection: "row",
     alignItems: "center",
@@ -166,6 +151,8 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     backgroundColor: palette.homeBackground,
   },
   search: {
+    flex: 1,
+    height: "100%",
     color: palette.text,
     fontSize: fonts.size.md,
     paddingHorizontal: layout.gutter,
@@ -180,16 +167,18 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     paddingHorizontal: layout.gutter,
     fontFamily: fonts.variants.regular,
   },
-  currencyContainer: {
-    // alignItems: "center",
-    // justifyContent: "center",
+  header: {
+    borderRadius: 2,
+    flexDirection: "row",
+    backgroundColor: palette.homeBackground,
   },
   card: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: layout.gutter,
   },
-  innerCardSyle: {
+  innerCardStyle: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -209,8 +198,14 @@ const useStyles = makeUseStyles(({ layout, palette, fonts, edgeInsets }) => ({
     color: palette.grey,
     fontSize: fonts.size.s,
   },
-  checkIcon: {
-    borderRadius: 50,
+  cancelButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 30 / 2,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: layout.gutter / 2,
+    backgroundColor: palette.dateBackground,
   },
   loaderContainer: {
     flex: 1,
