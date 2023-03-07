@@ -38,7 +38,7 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
   const { currency } = useContext();
   const { styles, palette, fonts } = useStyles();
   const [state, setState] = useState({
-    to: { amount: "98.01", name: "Euro", symbol: "€" },
+    to: { amount: "0", name: "Euro", symbol: "€" },
     from: { amount: "100", name: "US Dollar", symbol: "$" },
   });
   const currencyRef = useRef<keyof typeof state>("to");
