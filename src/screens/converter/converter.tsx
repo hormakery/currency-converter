@@ -39,8 +39,8 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
   const { currency } = useContext();
   const { styles, palette, fonts } = useStyles();
   const [state, setState] = useState({
-    to: { amount: "", name: "Euro", symbol: "€" },
-    from: { amount: "", name: "US Dollar", symbol: "$" },
+    to: { amount: "", name: "NGN", symbol: "€" },
+    from: { amount: "", name: "USD", symbol: "$" },
   });
   const currencyRef = useRef<keyof typeof state>("to");
 
@@ -50,6 +50,34 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
       setState({ ...state, [key]: { ...state[key], ...currency } });
     }
   }, [currency, currencyRef]);
+
+  const getConvertedCurrency = async () => {
+    if (!state.from.amount) {
+      return setState({ ...state, to: { ...state.to, amount: "" } });
+    }
+
+    try {
+      const amount = await convertCurrency({
+        to: state.to.name,
+        from: state.from.name,
+        amount: state.from.amount,
+      });
+
+      setState({ ...state, to: { ...state.to, amount } });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      getConvertedCurrency();
+    }, 50);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [state.from.amount]);
 
   const handlePress = (title: keyof typeof state) => {
     currencyRef.current = title;
@@ -75,17 +103,6 @@ export const Converter: React.FC<RootTabScreenProps<"Converter">> = ({
     setState({
       ...state,
       from: { ...state.from, amount: `${state.from.amount}${amount}` },
-    });
-
-    const response = await convertCurrency({
-      to: state.to.name,
-      from: state.from.name,
-      amount: `${state.from.amount}${amount}`,
-    });
-
-    setState({
-      ...state,
-      to: { ...state.to, amount: response.convertedAmount },
     });
   };
 

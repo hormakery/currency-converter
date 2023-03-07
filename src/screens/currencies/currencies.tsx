@@ -34,7 +34,7 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   };
 
   const data = currencies.filter((currency) =>
-    currency.name.toLowerCase().includes(searchInput.toLowerCase())
+    currency.country.toLowerCase().includes(searchInput.toLowerCase())
   );
 
   const renderItem: FlatListProps<CurrencyInterface>["renderItem"] = ({

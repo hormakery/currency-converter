@@ -1,5 +1,5 @@
 import { CurrencyInterface } from "../types/types";
-import debounce from "lodash.debounce";
+
 const COUNTRY_BASE_URL = "https://restcountries.com/v3.1/all";
 const CURRENCY_BASE_URL = "https://currency-converter18.p.rapidapi.com/api/v1";
 
@@ -84,14 +84,26 @@ type ConvertCurrencyPayload = {
   amount: string;
 };
 
-export const convertCurrency = debounce(
-  async (payload: ConvertCurrencyPayload): Promise<any> => {
-    const response = await fetch(
-      `${CURRENCY_BASE_URL}/convert?from=${payload.from}&to=${payload.to}&amount=${payload.amount}`,
-      BASE_API_OPTIONS
-    );
-    const currency = await response.json();
-    return currency.result;
-  },
-  50
-);
+export const convertCurrency = async (
+  payload: ConvertCurrencyPayload
+): Promise<any> => {
+  const response = await fetch(
+    `${CURRENCY_BASE_URL}/convert?from=${payload.from}&to=${payload.to}&amount=${payload.amount}`,
+    BASE_API_OPTIONS
+  );
+  const currency = await response.json();
+
+  if (!currency || !currency.success || !currency.result) {
+    throw new Error("Error converting currency");
+  }
+
+  const convertedAmount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: payload.to,
+  })
+    .format(currency.result.convertedAmount)
+    .replaceAll(payload.to, "")
+    .trim();
+
+  return convertedAmount;
+};
