@@ -33,6 +33,10 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
     navigation.goBack();
   };
 
+  const data = currencies.filter((currency) =>
+    currency.name.toLowerCase().includes(searchInput.toLowerCase())
+  );
+
   const renderItem: FlatListProps<CurrencyInterface>["renderItem"] = ({
     item,
   }) => (
@@ -54,47 +58,44 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
   );
 
   const ListHeaderComponent: FlatListProps<CurrencyInterface>["ListHeaderComponent"] =
-    useCallback(
-      () => (
-        <Fragment>
-          <View style={styles.searchContainer}>
-            <View style={styles.searchWrapper}>
-              <FontAwesome
-                size={18}
-                name="search"
-                color={palette.primary}
-                style={{ justifyContent: "flex-start", marginLeft: 8 }}
-              />
-              <TextInput
-                value={searchInput}
-                autoCorrect={false}
-                style={styles.search}
-                placeholder="Search Currency"
-                onChangeText={setSearchInput}
-                onFocus={() => setClicked(true)}
-              />
+    (
+      <Fragment>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchWrapper}>
+            <FontAwesome
+              size={18}
+              name="search"
+              color={palette.primary}
+              style={{ justifyContent: "flex-start", marginLeft: 8 }}
+            />
+            <TextInput
+              value={searchInput}
+              autoCorrect={false}
+              style={styles.search}
+              placeholder="Search Currency"
+              onChangeText={setSearchInput}
+              onFocus={() => setClicked(true)}
+            />
 
-              {clicked && (
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    Keyboard.dismiss();
-                    setClicked(false);
-                    setSearchInput("");
-                  }}
-                >
-                  <FontAwesome name="close" color={palette.hairlineColor} />
-                </TouchableOpacity>
-              )}
-            </View>
+            {clicked && (
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setClicked(false);
+                  setSearchInput("");
+                }}
+              >
+                <FontAwesome name="close" color={palette.hairlineColor} />
+              </TouchableOpacity>
+            )}
           </View>
+        </View>
 
-          <View style={styles.header}>
-            <Text style={styles.currencies}>All currencies</Text>
-          </View>
-        </Fragment>
-      ),
-      []
+        <View style={styles.header}>
+          <Text style={styles.currencies}>All currencies</Text>
+        </View>
+      </Fragment>
     );
 
   const ListEmptyComponent: FlatListProps<CurrencyInterface>["ListEmptyComponent"] =
@@ -120,7 +121,7 @@ export const CurrenciesScreen: React.FC<RootStackScreenProps<"Currencies">> = ({
 
   return (
     <FlatList
-      data={currencies}
+      data={data}
       renderItem={renderItem}
       ListEmptyComponent={ListEmptyComponent}
       ListHeaderComponent={ListHeaderComponent}
